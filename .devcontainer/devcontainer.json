@@ -1,0 +1,14 @@
+{
+  "name": "Personal CRM (Pi)",
+  "build": { "dockerfile": "Dockerfile" },
+  "workspaceFolder": "/workspaces/crm",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/crm,type=bind",
+  "remoteUser": "node",
+  "forwardPorts": [5173],
+  "postCreateCommand": "mkdir -p ~/.pi/agent && cp .devcontainer/models.json ~/.pi/agent/models.json && pi install npm:pi-web-access && npx --yes skills add vercel-labs/agent-browser && if [ -f package.json ]; then npm install; fi",
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+    }
+  }
+}

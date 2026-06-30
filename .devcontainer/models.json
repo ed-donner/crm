@@ -1,0 +1,13 @@
+{
+  "providers": {
+    "openrouter": {
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "api": "openai-completions",
+      "apiKey": "$OPENROUTER_API_KEY",
+      "models": [
+        { "id": "deepseek/deepseek-v4-pro", "name": "DeepSeek V4 Pro", "input": ["text", "image"] },
+        { "id": "z-ai/glm-5.2", "name": "GLM 5.2", "input": ["text"] }
+      ]
+    }
+  }
+}
