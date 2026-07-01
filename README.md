@@ -17,7 +17,7 @@ Works the same on **macOS and Windows**.
 ## Setup (one time)
 
 1. Open this folder in VS Code.
-2. Run **"Dev Containers: Reopen in Container"** (Command Palette, `F1`). The first build takes a few
+2. Run **"Dev Containers: Reopen in Container"** (Ctrl+Shift+P on PC, Cmd+Shift+P on Mac, type in that command). The first build takes a few
    minutes — it installs Node, Pi, agent-browser + Chromium, and the web-search tool. Later starts are
    instant.
 3. Add your API key: create a file named **`.env`** in the project root with one line:
