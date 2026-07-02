@@ -62,6 +62,100 @@ Just enough direction to keep things on track — specific choices are left to t
 - Keep the implementation simple and conventional. Library, data and structure choices are the
   Coding Agent's call, as long as the requirements and the success criteria below are met.
 
+## Tech stack and ecosystem
+
+The project is a **local-first, single-user web app**: a React frontend talks to a small Express
+API backed by SQLite. Everything runs on your machine — no cloud services, no auth, no external
+database.
+
+### Architecture
+
+```
+Browser  →  React SPA (Vite)  →  REST API (/api/*)  →  better-sqlite3  →  data/crm.sqlite
+```
+
+- **Development:** Vite dev server on port **5173** (hot reload); Express API on port **3001**.
+  Vite proxies `/api` requests to the backend. Use `npm run dev`.
+- **Production:** Express serves the built frontend from `dist/` and the API on a **single port**
+  (5173). Use `npm start` (run `npm run build` first if the UI changed).
+
+### Frontend
+
+| Layer | Choice | Role |
+| ----- | ------ | ---- |
+| Build tool | **Vite 6** | Dev server, HMR, production bundle |
+| UI framework | **React 18** | Pages, components, forms |
+| Language | **TypeScript 5** | Shared types between app and server |
+| Routing | **React Router 6** | Five main sections + detail pages |
+| Data tables | **TanStack Table 8** | Searchable org/contact/deal tables |
+| Charts | **Recharts 2** | Dashboard: deals won & revenue per month |
+| Drag-and-drop | **dnd-kit** | Pipeline board — drag deal cards between stages |
+
+Frontend code lives in `src/` (pages, components, forms, API client).
+
+### Backend and data
+
+| Layer | Choice | Role |
+| ----- | ------ | ---- |
+| Runtime | **Node.js 24** | Local server (via `tsx`) |
+| HTTP server | **Express 4** | REST routes under `/api/*` |
+| Database | **SQLite** (file: `data/crm.sqlite`) | Persistent local storage |
+| SQLite driver | **better-sqlite3** | Synchronous, fast access from Node |
+| CORS | **cors** | Allows dev proxy from Vite |
+
+Backend code lives in `server/`:
+
+- `db.ts` / `schema.ts` — open database, define tables
+- `repositories.ts` — CRUD, search, validation for all four record types
+- `routes.ts` — REST endpoints
+- `dashboard.ts` — aggregation for charts, activity feed, tasks
+- `seed.ts` — realistic sample data (`npm run seed`)
+- `index.ts` — server entry (API + static frontend in production)
+
+### Dev tooling and testing
+
+| Tool | Role |
+| ---- | ---- |
+| **tsx** | Run TypeScript server and seed script without a separate compile step |
+| **concurrently** | Start API + Vite together in dev (`npm run dev`) |
+| **Vitest** | Unit tests for repositories, search, stage changes, activities |
+| **TypeScript** | Separate configs for app (`tsconfig.app.json`) and server (`tsconfig.server.json`) |
+
+Tests live in `tests/`. Vite is configured with **filesystem polling** for reliable HMR inside
+Docker / WSL bind mounts.
+
+### Dev container ecosystem
+
+Development is intended to run inside a **VS Code / Cursor Dev Container** (Docker):
+
+- **Base image:** `mcr.microsoft.com/devcontainers/javascript-node:24-bookworm`
+- **Pre-installed:** Node 24, **Pi** coding agent (`@earendil-works/pi-coding-agent`),
+  **agent-browser** + headless Chromium (for automated browser validation)
+- **Port forwarding:** 5173 → host browser at `http://localhost:5173`
+- **postCreateCommand:** installs npm dependencies and `pi-web-access` (web search tool)
+- **`.env`:** gitignored; auto-loaded into every shell (e.g. `OPENROUTER_API_KEY` for Pi)
+
+See [`STEP_BY_STEP.md`](./STEP_BY_STEP.md) for container setup and run instructions.
+
+### NPM scripts
+
+| Command | What it does |
+| ------- | ------------ |
+| `npm start` | Production server (built frontend + API on port 5173) |
+| `npm run dev` | Vite dev server + API with hot reload |
+| `npm run build` | Build frontend into `dist/` |
+| `npm test` | Run unit tests |
+| `npm run seed` | Wipe and re-seed `data/crm.sqlite` with sample data |
+| `npm run typecheck` | Type-check app and server |
+
+### Conventions for agents
+
+- Prefer the **existing libraries** (TanStack Table, Recharts, dnd-kit) over custom implementations.
+- Keep **REST + repository** patterns; don't introduce ORMs or extra layers unless necessary.
+- All persistence goes through **SQLite** — no in-memory-only state for user data.
+- Match the **brand palette** and project layout when adding features; see `src/constants.ts` and
+  existing components for patterns.
+
 ## Not in scope (v1)
 
 Deliberately left out to keep this small and focused. Do not build these:
